@@ -22,9 +22,9 @@ import aiohttp
 class FileRAGSystem:
     def __init__(self):
         # 初始化API配置
-        self.youdao_appid = "1f5bd96a38c3b8b2"  # 网易有道翻译APPID
-        self.youdao_key = "EwPd4WD9wnhTsBLWZffR5RPXBtLiXWNy"  # 网易有道翻译密钥
-        self.zhipu_api_key = "0e9517beeddfa990fa4535cf5a586d51.vexg1jTHVdU2b4I5"  # 智谱API密钥
+        self.youdao_appid = "YOUR_YOUDAO_APPID"  # 网易有道翻译APPID
+        self.youdao_key = "YOUR_YOUDAO_KEY"  # 网易有道翻译密钥
+        self.zhipu_api_key = "YOUR_ZHIPU_API_KEY"  # 智谱API密钥
         self.zhipu_api_url = "https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/invoke"
         
         # 检查API配置
