@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜式润色系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 20px;
+        }
+        .answer-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .translation-box {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            background-color: #fff;
+        }
+        .model-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-left: 4px solid #0d6efd;
+        }
+        .analysis-box {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">镜式润色系统</h1>
+
+        <!-- 知识库管理区域 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>知识库管理</h5>
+            </div>
+            <div class="card-body">
+                <form id="kbForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="kbFile" class="form-label">上传知识库文件</label>
+                        <input class="form-control" type="file" id="kbFile" name="file" required>
+                        <div class="form-text">支持的文件格式：.txt, .docx, .pdf, .json</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">上传知识库</button>
+                </form>
+                <form id="saveKbForm" class="mt-3">
+                    <div class="mb-3">
+                        <label for="filename" class="form-label">保存知识库</label>
+                        <input type="text" class="form-control" id="filename" name="filename" 
+                               placeholder="输入文件名（可选，默认为knowledge_base_时间戳.json）">
+                        <div class="form-text">知识库将保存为JSON格式文件</div>
+                    </div>
+                    <button type="submit" class="btn btn-success">保存知识库</button>
+                </form>
+                <div id="kbResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- 文本润色区域 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>文本润色</h5>
+            </div>
+            <div class="card-body">
+                <!-- 文档润色表单 -->
+                <form id="docPolishForm" class="mb-4">
+                    <div class="mb-3">
+                        <label for="docFile" class="form-label">上传文档进行润色：</label>
+                        <input type="file" class="form-control" id="docFile" accept=".txt,.docx,.pdf">
+                        <small class="text-muted">支持的文件格式：.txt, .docx, .pdf</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">选择润色模型：</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="docModel" id="docModelBoth" value="both" checked>
+                            <label class="form-check-label" for="docModelBoth">两个模型</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="docModel" id="docModelYoudao" value="youdao">
+                            <label class="form-check-label" for="docModelYoudao">仅有道翻译</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="docModel" id="docModelZhipu" value="zhipu">
+                            <label class="form-check-label" for="docModelZhipu">仅智谱API</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">润色文档</button>
+                </form>
+
+                <!-- 文本润色表单 -->
+                <form id="polishForm">
+                    <div class="mb-3">
+                        <label for="text" class="form-label">请输入需要润色的文本：</label>
+                        <textarea class="form-control" id="text" rows="5" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">选择润色模型：</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="model" id="modelBoth" value="both" checked>
+                            <label class="form-check-label" for="modelBoth">两个模型</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="model" id="modelYoudao" value="youdao">
+                            <label class="form-check-label" for="modelYoudao">仅有道翻译</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="model" id="modelZhipu" value="zhipu">
+                            <label class="form-check-label" for="modelZhipu">仅智谱API</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">润色</button>
+                    <button type="button" class="btn btn-info" onclick="comparePolish()">对比润色</button>
+                </form>
+                <div id="polishResult" class="answer-box d-none">
+                    <h6>润色结果：</h6>
+                    <div id="polishText"></div>
+                </div>
+                <div id="compareResult" class="answer-box d-none">
+                    <h6>对比结果：</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>有道翻译润色：</h6>
+                            <p id="youdaoText"></p>
+                            <small class="text-muted" id="youdaoTime"></small>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>智谱API润色：</h6>
+                            <p id="zhipuText"></p>
+                            <small class="text-muted" id="zhipuTime"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 知识库上传处理
+        document.getElementById('kbForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/upload_kb', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('上传失败：' + result.error);
+                } else {
+                    alert('上传成功：' + result.message);
+                    // 清空表单
+                    this.reset();
+                }
+            } catch (error) {
+                alert('上传失败：' + error.message);
+            }
+        });
+
+        // 保存知识库处理
+        document.getElementById('saveKbForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/save_kb', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.error) {
+                    document.getElementById('kbResult').innerHTML = 
+                        `<div class="alert alert-danger">${result.error}</div>`;
+                } else {
+                    document.getElementById('kbResult').innerHTML = 
+                        `<div class="alert alert-success">${result.message}</div>`;
+                    // 清空文件名输入框
+                    document.getElementById('filename').value = '';
+                }
+            } catch (error) {
+                document.getElementById('kbResult').innerHTML = 
+                    `<div class="alert alert-danger">保存失败：${error.message}</div>`;
+            }
+        });
+
+        // 文档润色处理
+        document.getElementById('docPolishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('docFile');
+            const model = document.querySelector('input[name="docModel"]:checked').value;
+            
+            if (!fileInput.files.length) {
+                alert('请选择要润色的文档');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('model', model);
+
+            try {
+                const response = await fetch('/polish_doc', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert(result.error);
+                    return;
+                }
+
+                alert(`文档润色完成！\n润色后的文件已保存为：${result.filename}`);
+            } catch (error) {
+                alert(`文档润色失败：${error.message}`);
+            }
+        });
+
+        // 润色处理
+        document.getElementById('polishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('text').value;
+            const model = document.querySelector('input[name="model"]:checked').value;
+            
+            if (!text.trim()) {
+                document.getElementById('polishResult').classList.remove('d-none');
+                document.getElementById('polishText').innerHTML = 
+                    `<div class="alert alert-danger">文本不能为空</div>`;
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('text', text);
+            formData.append('model', model);
+
+            try {
+                const response = await fetch('/polish', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.error) {
+                    document.getElementById('polishResult').classList.remove('d-none');
+                    document.getElementById('polishText').innerHTML = 
+                        `<div class="alert alert-danger">${result.error}</div>`;
+                    return;
+                }
+
+                displayPolishResult(result);
+            } catch (error) {
+                document.getElementById('polishResult').classList.remove('d-none');
+                document.getElementById('polishText').innerHTML = 
+                    `<div class="alert alert-danger">润色失败：${error.message}</div>`;
+            }
+        });
+
+        // 对比润色处理
+        async function comparePolish() {
+            const text = document.getElementById('text').value;
+            
+            if (!text.trim()) {
+                document.getElementById('compareResult').classList.remove('d-none');
+                document.getElementById('youdaoText').textContent = '文本不能为空';
+                document.getElementById('zhipuText').textContent = '文本不能为空';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('text', text);
+            formData.append('model', 'both');
+
+            try {
+                const response = await fetch('/polish', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.error) {
+                    document.getElementById('compareResult').classList.remove('d-none');
+                    document.getElementById('youdaoText').textContent = result.error;
+                    document.getElementById('zhipuText').textContent = result.error;
+                    return;
+                }
+
+                displayCompareResult(result);
+            } catch (error) {
+                document.getElementById('compareResult').classList.remove('d-none');
+                document.getElementById('youdaoText').textContent = `润色失败：${error.message}`;
+                document.getElementById('zhipuText').textContent = `润色失败：${error.message}`;
+            }
+        }
+
+        function displayPolishResult(result) {
+            const polishResult = document.getElementById('polishResult');
+            const polishText = document.getElementById('polishText');
+            
+            polishResult.classList.remove('d-none');
+            polishText.innerHTML = '';
+            
+            if (result.suggested.youdao) {
+                polishText.innerHTML += `
+                    <div class="mb-3">
+                        <h6>有道翻译润色：</h6>
+                        <p>${result.suggested.youdao}</p>
+                        <small class="text-muted">分析：${result.analysis.youdao}</small>
+                    </div>
+                `;
+            }
+            
+            if (result.suggested.zhipu) {
+                polishText.innerHTML += `
+                    <div class="mb-3">
+                        <h6>智谱API润色：</h6>
+                        <p>${result.suggested.zhipu}</p>
+                        <small class="text-muted">分析：${result.analysis.zhipu}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function displayCompareResult(result) {
+            const compareResult = document.getElementById('compareResult');
+            const youdaoText = document.getElementById('youdaoText');
+            const zhipuText = document.getElementById('zhipuText');
+            const youdaoTime = document.getElementById('youdaoTime');
+            const zhipuTime = document.getElementById('zhipuTime');
+            
+            compareResult.classList.remove('d-none');
+            
+            if (result.suggested.youdao) {
+                youdaoText.textContent = result.suggested.youdao;
+                youdaoTime.textContent = `分析：${result.analysis.youdao}`;
+            }
+            
+            if (result.suggested.zhipu) {
+                zhipuText.textContent = result.suggested.zhipu;
+                zhipuTime.textContent = `分析：${result.analysis.zhipu}`;
+            }
+        }
+    </script>
+</body>
+</html> 
