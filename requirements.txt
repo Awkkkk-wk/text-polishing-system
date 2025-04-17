@@ -1,5 +1,5 @@
 # Web框架
-Flask==2.3.3
+Flask==3.0.2
 quart==0.18.4  # 异步Web框架
 aiohttp==3.8.5  # 异步HTTP客户端
 
