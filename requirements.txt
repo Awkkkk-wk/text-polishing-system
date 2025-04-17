@@ -1,7 +1,7 @@
 # Web框架
 Flask==3.0.2
 quart==0.20.0  # 异步Web框架
-aiohttp== 3.9.3  # 异步HTTP客户端
+aiohttp  # 异步HTTP客户端
 
 # 文件处理
 python-docx==0.8.11  # Word文档处理
