@@ -8,12 +8,12 @@
 
 1. 直接访问项目地址：
    ```
-   https://github.com/[用户名]/text-polishing-system
+   https://github.com/Awkkkk-wk/text-polishing-system
    ```
 
 2. 使用Git克隆项目：
    ```bash
-   git clone https://github.com/[用户名]/text-polishing-system.git
+   git clone https://github.com/Awkkkk-wk/text-polishing-system.git
    ```
 
 3. 下载ZIP包：
