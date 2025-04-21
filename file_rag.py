@@ -23,9 +23,9 @@ import uuid
 class FileRAGSystem:
     def __init__(self):
         # 初始化API配置 - 这里填入实际的API密钥
-        self.youdao_appid = "38c84111528c7fa7"  # 网易有道翻译APPID
-        self.youdao_key = "jya0I3IST2MhwzsDil0cHa6FlKsxebei"  # 网易有道翻译密钥
-        self.zhipu_api_key = "0e9517beeddfa990fa4535cf5a586d51.vexg1jTHVdU2b4I5"  # 智谱API密钥
+        self.youdao_appid = "YOUR_YOUDAO_APPID"  # 网易有道翻译APPID
+        self.youdao_key = "YOUR_YOUDAO_KEY"  # 网易有道翻译密钥
+        self.zhipu_api_key = "YOUR_ZHIPU_API_KEY"  # 智谱API密钥
         self.zhipu_api_url = "https://open.bigmodel.cn/api/paas/v3/model-api/GLM-4-Flash/invoke"
         
         # 检查API配置并提供警告
